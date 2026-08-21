@@ -1,0 +1,7 @@
+﻿- Base imagC: nginx:1.27-alpine
+- Custom imagC: phase01-nginx:1.0
+- Browser: http://localhost:8081/
+- VolumC: phase01-webdata
+- Network: phase01-net
+- Config: config/default.conf, config/app.env
+- Check: Invoke-WebRequest -Uri 'http://localhost:8081/' -UseBasicParsing
