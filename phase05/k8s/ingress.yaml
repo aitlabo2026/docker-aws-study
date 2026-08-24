@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata: {name: phase05-web, namespace: phase05-app}
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: phase05.localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend: {service: {name: phase05-web, port: {number: 80}}}
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend: {service: {name: phase05-web, port: {number: 80}}}

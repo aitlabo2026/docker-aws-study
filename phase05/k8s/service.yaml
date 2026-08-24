@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Service
+metadata: {name: phase05-web, namespace: phase05-app}
+spec:
+  type: ClusterIP
+  selector: {app: phase05-web}
+  ports: [{name: http, port: 80, targetPort: 80, protocol: TCP}]

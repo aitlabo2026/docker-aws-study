@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: phase05-web, namespace: phase05-app}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: phase05-web}}
+  template:
+    metadata: {labels: {app: phase05-web}}
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.27-alpine
+        ports: [{containerPort: 80}]
+        env:
+        - name: APP_MESSAGE
+          valueFrom: {secretKeyRef: {name: phase05-app-secret, key: APP_MESSAGE}}
+        volumeMounts: [{name: web-content, mountPath: /usr/share/nginx/html, readOnly: true}]
+        resources: {requests: {cpu: 25m, memory: 32Mi}, limits: {cpu: 100m, memory: 64Mi}}
+        readinessProbe: {httpGet: {path: /, port: 80}, initialDelaySeconds: 3}
+        livenessProbe: {httpGet: {path: /, port: 80}, initialDelaySeconds: 10}
+      volumes: [{name: web-content, configMap: {name: phase05-web-content}}]

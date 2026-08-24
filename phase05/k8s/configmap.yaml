@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: phase05-web-content, namespace: phase05-app}
+data:
+  index.html: |
+    <!doctype html><html lang="ja"><meta charset="utf-8"><title>Phase 5</title><body><h1>Phase 5 Kubernetes 基礎</h1></body></html>
