@@ -1,0 +1,1 @@
+function Write-Utf8NoBom { param([string]$Path,[string]$Value) $target=$ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path);$e=New-Object System.Text.UTF8Encoding($false);[IO.File]::WriteAllText($target,$Value,$e) }

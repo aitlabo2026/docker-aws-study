@@ -1,0 +1,19 @@
+apiVersion: v1
+data:
+  realm-phase03.json: "{\n  \"realm\": \"phase03\",\n  \"enabled\": true,\n  \"displayName\":
+    \"Phase 3 Learning Realm\",\n  \"roles\": {\"realm\": [{\"name\": \"app-user\",
+    \"description\": \"Application user\"}]},\n  \"clients\": [{\n    \"clientId\":
+    \"phase03-frontend\",\n    \"name\": \"Phase 3 Frontend\",\n    \"enabled\": true,\n
+    \   \"publicClient\": true,\n    \"standardFlowEnabled\": true,\n    \"directAccessGrantsEnabled\":
+    true,\n    \"redirectUris\": [\"http://phase06.localhost:18081/*\"],\n    \"webOrigins\":
+    [\"http://phase06.localhost:18081\"],\n    \"protocol\": \"openid-connect\",\n
+    \   \"attributes\": {\"pkce.code.challenge.method\": \"S256\"}\n  }],\n  \"users\":
+    [{\n    \"username\": \"student\",\n    \"enabled\": true,\n    \"emailVerified\":
+    true,\n    \"firstName\": \"Phase\",\n    \"lastName\": \"Student\",\n    \"email\":
+    \"student@example.local\",\n    \"credentials\": [{\"type\": \"password\", \"value\":
+    \"Learning-Only-Password\", \"temporary\": false}],\n    \"realmRoles\": [\"app-user\"]\n
+    \ }]\n}\r\n"
+kind: ConfigMap
+metadata:
+  name: phase06-keycloak-realm
+  namespace: phase06-app

@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: keycloak, namespace: phase06-app}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: keycloak}}
+  template:
+    metadata: {labels: {app: keycloak}}
+    spec:
+      containers:
+      - name: keycloak
+        image: quay.io/keycloak/keycloak:26.3.2
+        args: [start-dev, --import-realm, --http-relative-path=/auth]
+        env:
+        - {name: KC_HOSTNAME, value: 'http://phase06.localhost:18081/auth'}
+        envFrom: [{secretRef: {name: phase06-keycloak-secret}}]
+        ports: [{containerPort: 8080}]
+        readinessProbe: {httpGet: {path: /auth/realms/master, port: 8080}, initialDelaySeconds: 30, periodSeconds: 10}
+        volumeMounts: [{name: realm, mountPath: /opt/keycloak/data/import, readOnly: true}]
+      volumes: [{name: realm, configMap: {name: phase06-keycloak-realm}}]
+---
+apiVersion: v1
+kind: Service
+metadata: {name: keycloak, namespace: phase06-app}
+spec: {selector: {app: keycloak}, ports: [{port: 8080, targetPort: 8080}]}

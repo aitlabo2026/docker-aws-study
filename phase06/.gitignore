@@ -1,0 +1,5 @@
+.env
+*.secret.yaml
+secret.yaml
+*.log
+*.tar

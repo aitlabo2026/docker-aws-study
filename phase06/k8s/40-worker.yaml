@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: worker, namespace: phase06-app}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: worker}}
+  template:
+    metadata: {labels: {app: worker}}
+    spec:
+      containers:
+      - name: worker
+        image: phase06-api:1.0
+        imagePullPolicy: Never
+        command: [celery, -A, 'app.tasks:celery_app', worker, --loglevel=info]
+        envFrom: [{configMapRef: {name: phase06-api-config}}, {secretRef: {name: phase06-db-secret}}]
