@@ -1,0 +1,8 @@
+spec:
+  template:
+    spec:
+      containers:
+      - name: api
+        startupProbe: {httpGet: {path: /api/health, port: 8000}, periodSeconds: 5, failureThreshold: 30}
+        readinessProbe: {httpGet: {path: /api/health, port: 8000}, periodSeconds: 5, timeoutSeconds: 3, failureThreshold: 3}
+        livenessProbe: {httpGet: {path: /api/health, port: 8000}, periodSeconds: 10, timeoutSeconds: 3, failureThreshold: 3}

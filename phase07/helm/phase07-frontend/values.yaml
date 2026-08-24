@@ -1,0 +1,7 @@
+replicaCount: 2
+image: {repository: phase06-frontend, tag: "1.0", pullPolicy: Never}
+service: {port: 80}
+ingress: {className: nginx, host: phase07.localhost}
+resources:
+  requests: {cpu: 25m, memory: 32Mi}
+  limits: {cpu: 100m, memory: 128Mi}
