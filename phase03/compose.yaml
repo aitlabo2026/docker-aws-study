@@ -1,0 +1,142 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: phase03-nginx
+    ports: ["8080:80"]
+    volumes: ["./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"]
+    depends_on:
+      frontend: {condition: service_started}
+      api: {condition: service_healthy}
+    restart: unless-stopped
+    networks: [phase03-net]
+
+  frontend:
+    build: {context: ./frontend}
+    image: phase03-frontend:1.0
+    container_name: phase03-frontend
+    restart: unless-stopped
+    networks: [phase03-net]
+
+  api:
+    build: {context: ./api}
+    image: phase03-api:1.0
+    container_name: phase03-api
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER}
+      KEYCLOAK_JWKS_URL: ${KEYCLOAK_JWKS_URL}
+    ports: ["8000:8000"]
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      keycloak: {condition: service_started}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+    networks: [phase03-net]
+
+  worker:
+    image: phase03-api:1.0
+    container_name: phase03-worker
+    command: ["celery", "-A", "app.tasks:celery_app", "worker", "--loglevel=info"]
+    depends_on:
+      redis: {condition: service_healthy}
+    restart: unless-stopped
+    networks: [phase03-net]
+
+  db:
+    image: postgres:16-alpine
+    container_name: phase03-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes: ["postgres-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    networks: [phase03-net]
+
+  pgadmin:
+    image: dpage/pgadmin4:9
+    container_name: phase03-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports: ["5050:80"]
+    volumes: ["pgadmin-data:/var/lib/pgadmin"]
+    depends_on:
+      db: {condition: service_healthy}
+    restart: unless-stopped
+    networks: [phase03-net]
+
+  redis:
+    image: redis:7-alpine
+    container_name: phase03-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: ["redis-data:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    networks: [phase03-net]
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.2
+    container_name: phase03-keycloak
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_HOSTNAME: http://localhost:8081
+    ports: ["8081:8080"]
+    volumes: ["./keycloak/realm-phase03.json:/opt/keycloak/data/import/realm-phase03.json:ro"]
+    restart: unless-stopped
+    networks: [phase03-net]
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: phase03-prometheus
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.path=/prometheus"]
+    ports: ["9090:9090"]
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+    networks: [phase03-net]
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    container_name: phase03-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+    ports: ["3000:3000"]
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      prometheus: {condition: service_started}
+    restart: unless-stopped
+    networks: [phase03-net]
+
+networks:
+  phase03-net:
+    name: phase03-net
+
+volumes:
+  postgres-data: {name: phase03-postgres-data}
+  pgadmin-data: {name: phase03-pgadmin-data}
+  redis-data: {name: phase03-redis-data}
+  prometheus-data: {name: phase03-prometheus-data}
+  grafana-data: {name: phase03-grafana-data}
