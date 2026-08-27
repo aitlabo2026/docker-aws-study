@@ -1,11 +1,9 @@
 import os
-
 import psycopg
 import redis
 from fastapi import FastAPI
 
 app = FastAPI(title="Phase 2 API")
-
 
 def db_connection():
     return psycopg.connect(
@@ -15,11 +13,9 @@ def db_connection():
         password=os.environ["POSTGRES_PASSWORD"],
     )
 
-
 @app.get("/")
 def root():
     return {"service": "phase02-api"}
-
 
 @app.get("/api/health")
 def health():
@@ -27,9 +23,8 @@ def health():
         with connection.cursor() as cursor:
             cursor.execute("SELECT 1")
             database = cursor.fetchone()[0] == 1
-    cache = redis.Redis(host=os.environ["REDIS_HOST"], port=6379).ping()
+    cache = redis.Redis(host=os.environ.get("REDIS_HOST", "redis"), port=6379).ping()
     return {"api": "ok", "database": database, "redis": cache}
-
 
 @app.get("/api/items")
 def items():
