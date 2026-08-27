@@ -1,5 +1,4 @@
 # Phase 03 Notes
-
 - Keycloak authenticates users and issues signed access tokens.
 - React uses Authorization Code Flow with PKCE and keeps tokens in memory.
 - FastAPI verifies JWT signature, issuer, expiration, and app-user role.
