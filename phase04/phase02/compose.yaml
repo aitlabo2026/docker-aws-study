@@ -1,0 +1,114 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: phase02-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      frontend:
+        condition: service_started
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - phase02-net
+
+  frontend:
+    build:
+      context: ./frontend
+    image: phase02-frontend:1.0
+    container_name: phase02-frontend
+    restart: unless-stopped
+    networks:
+      - phase02-net
+
+  api:
+    build:
+      context: ./api
+    image: phase02-api:1.0
+    container_name: phase02-api
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - phase02-net
+
+  db:
+    image: postgres:16-alpine
+    container_name: phase02-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - phase02-net
+
+  pgadmin:
+    image: dpage/pgadmin4:9
+    container_name: phase02-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - phase02-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: phase02-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - phase02-net
+
+networks:
+  phase02-net:
+    name: phase02-net
+
+volumes:
+  postgres-data:
+    name: phase02-postgres-data
+  pgadmin-data:
+    name: phase02-pgadmin-data
+  redis-data:
+    name: phase02-redis-data

@@ -1,5 +1,4 @@
 # Phase 04 Docker Operations
-
 ## Scope
 - Health checks for 10 services
 - Docker json-file logs with 10m x 3 rotation

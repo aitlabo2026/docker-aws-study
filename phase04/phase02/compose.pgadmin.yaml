@@ -1,0 +1,26 @@
+{
+services: {
+pgadmin: {
+image: "dpage/pgadmin4:9",
+container_name: "phase02-pgadmin",
+environment: {
+PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL}",
+PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD}"
+},
+ports: ["5050:80"],
+volumes: ["pgadmin-data:/var/lib/pgadmin"],
+depends_on: {
+db: {
+condition: "service_healthy"
+}
+},
+restart: "unless-stopped",
+networks: ["phase02-net"]
+}
+},
+volumes: {
+pgadmin-data: {
+name: "phase02-pgadmin-data"
+}
+}
+}
