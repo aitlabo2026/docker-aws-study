@@ -1,9 +1,1 @@
-import Keycloak from "keycloak-js";
-
-const keycloak = new Keycloak({
-  url: "http://phase06.localhost:18081/auth",
-  realm: "phase03",
-  clientId: "phase03-frontend"
-});
-
-export default keycloak;
+import Keycloak from "keycloak-js"; const keycloak = new Keycloak({url: "http://phase06.localhost:18081/auth", realm: "phase03", clientId: "phase03-frontend"}); export default keycloak;
