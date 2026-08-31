@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  realm-phase03.json: '{"realm":"phase03","enabled":true,"displayName":"Phase 3 Learning
+    Realm","roles":{"realm":[{"name":"app-user","description":"Application user"}]},"clients":[{"clientId":"phase03-frontend","name":"Phase
+    3 Frontend","enabled":true,"publicClient":true,"standardFlowEnabled":true,"directAccessGrantsEnabled":true,"redirectUris":["http://localhost:18090/*"],"webOrigins":["http://localhost:18090"],"protocol":"openid-connect","attributes":{"pkce.code.challenge.method":"S256"}}],"users":[{"username":"student","enabled":true,"emailVerified":true,"firstName":"Phase","lastName":"Student","email":"student@example.com","credentials":[{"type":"password","value":"Learning-Only-Password","temporary":false}],"realmRoles":["app-user"]}]}'
+kind: ConfigMap
+metadata:
+  name: phase09-keycloak-realm
+  namespace: phase09-app

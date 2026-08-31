@@ -1,0 +1,1 @@
+{"Profile":"testuser001","Region":"ap-northeast-1","ClusterName":"docker-aws-study-phase08","Namespace":"phase09-app","NodeRoleName":"docker-aws-study-phase08-eks-node-role","FrontendRepository":"docker-aws-study/frontend","ApiRepository":"docker-aws-study/api","ImageTag":"phase09-v1","LocalFrontendImage":"phase09-frontend:1.0","LocalApiImage":"phase09-api:1.0"}

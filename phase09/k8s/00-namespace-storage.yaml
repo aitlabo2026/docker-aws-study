@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata: {name: phase09-app, labels: {learning-phase: "09"}}
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata: {name: phase09-gp3}
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+parameters: {type: gp3, encrypted: "true"}

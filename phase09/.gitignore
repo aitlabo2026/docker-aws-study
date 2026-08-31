@@ -1,0 +1,9 @@
+.env
+*.secret.yaml
+secret.yaml
+*.pem
+*.key
+*.log
+*.pid
+*.tar
+credentials
