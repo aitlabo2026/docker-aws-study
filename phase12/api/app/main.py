@@ -3,8 +3,8 @@ import psycopg
 import redis
 from celery.result import AsyncResult
 from fastapi import Depends, FastAPI
-from prometheus_fastapi_instrumentator import Instrumentator
 from app.aws_services import router as aws_router
+from prometheus_fastapi_instrumentator import Instrumentator
 from .auth import current_user
 from .tasks import celery_app, learning_job
 
