@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: phase10-managed-config, namespace: phase09-app}
+data:
+  POSTGRES_HOST: 'docker-aws-study-phase10-managed-database-1esugcbzypps.cbymway2ax6i.ap-northeast-1.rds.amazonaws.com'
+  POSTGRES_PORT: '5432'
+  REDIS_HOST: 'doc-ca-adccrmxs42eu.u8cuun.0001.apne1.cache.amazonaws.com'
+  REDIS_PORT: '6379'
+  AWS_REGION: 'ap-northeast-1'
+  AWS_DEFAULT_REGION: 'ap-northeast-1'
+  SQS_QUEUE_URL: 'https://sqs.ap-northeast-1.amazonaws.com/454229053884/docker-aws-study-phase10-jobs'
+  S3_BUCKET: 'docker-aws-study-phase10-managed-filebucket-8rwogpiojipr'
+  CELERY_BROKER_URL: 'sqs://'
+  CELERY_RESULT_BACKEND: 'redis://doc-ca-adccrmxs42eu.u8cuun.0001.apne1.cache.amazonaws.com:6379/1'

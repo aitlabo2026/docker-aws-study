@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: api, namespace: phase09-app}
+spec:
+  template:
+    spec:
+      containers:
+      - name: api
+        envFrom: [{configMapRef: {name: phase09-api-config}}, {secretRef: {name: phase09-db-secret}}, {configMapRef: {name: phase10-managed-config}}, {secretRef: {name: phase10-rds-secret}}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: worker, namespace: phase09-app}
+spec:
+  template:
+    spec:
+      containers:
+      - name: worker
+        envFrom: [{configMapRef: {name: phase09-api-config}}, {secretRef: {name: phase09-db-secret}}, {configMapRef: {name: phase10-managed-config}}, {secretRef: {name: phase10-rds-secret}}]

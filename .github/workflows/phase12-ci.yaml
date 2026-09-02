@@ -1,0 +1,93 @@
+name: phase12-ci
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'phase12/api/**'
+      - 'phase12/frontend/**'
+      - 'phase12/github/phase12-ci.yaml'
+      - '.github/workflows/phase12-ci.yaml'
+
+permissions:
+  id-token: write
+  contents: write
+
+env:
+  AWS_REGION: ap-northeast-1
+  ECR_REPOSITORY: docker-aws-study/api
+
+jobs:
+  test-build-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Python compile and lint
+        run: |
+          python -m compileall -q phase12/api/app
+          python -m pip install ruff
+          ruff check phase12/api/app
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: phase12/frontend/package-lock.json
+
+      - name: Frontend build
+        working-directory: phase12/frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build API image
+        run: |
+          docker build --tag phase12-api:${GITHUB_SHA} phase12/api
+
+      - name: Scan API image
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: 'phase12-api:${{ github.sha }}'
+          format: table
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: arn:aws:iam::454229053884:role/docker-aws-study-phase12-github-actions-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push API image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          TAG=sha-${GITHUB_SHA::12}
+          docker tag phase12-api:${GITHUB_SHA} ${REGISTRY}/${ECR_REPOSITORY}:${TAG}
+          docker push ${REGISTRY}/${ECR_REPOSITORY}:${TAG}
+          echo "IMAGE_TAG=${TAG}" >> "${GITHUB_ENV}"
+
+      - name: Update GitOps desired tag
+        run: |
+          python -c "from pathlib import Path; import os; p=Path('phase12/gitops/overlays/prod/kustomization.yaml'); lines=p.read_text(encoding='utf-8').splitlines(); p.write_text(chr(10).join(('  newTag: '+os.environ['IMAGE_TAG']) if line.strip().startswith('newTag:') else line for line in lines)+chr(10), encoding='utf-8')"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add phase12/gitops/overlays/prod/kustomization.yaml
+          git diff --cached --quiet || git commit -m "chore: deploy ${IMAGE_TAG}"
+          git push origin HEAD:main
