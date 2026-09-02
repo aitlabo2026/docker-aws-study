@@ -36,8 +36,8 @@ jobs:
       - name: Python compile and lint
         run: |
           python -m compileall -q phase12/api/app
-          python -m pip install ruff
-          ruff check phase12/api/app
+          python -m pip install ruff==0.16.5
+          ruff check --select E4,E7,E9,F phase12/api/app
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
