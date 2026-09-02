@@ -57,7 +57,7 @@ jobs:
           docker build --tag phase12-api:${GITHUB_SHA} phase12/api
 
       - name: Scan API image
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'phase12-api:${{ github.sha }}'
           format: table
