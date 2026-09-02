@@ -4,10 +4,12 @@ import redis
 from celery.result import AsyncResult
 from fastapi import Depends, FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
+from app.aws_services import router as aws_router
 from .auth import current_user
 from .tasks import celery_app, learning_job
 
 app = FastAPI(title="Phase 3 API")
+app.include_router(aws_router)
 Instrumentator().instrument(app).expose(app)
 
 def db_connection():
@@ -35,5 +37,3 @@ def create_job(user=Depends(current_user)):
 def job_status(task_id: str, user=Depends(current_user)):
     task = AsyncResult(task_id, app=celery_app)
     return {"task_id": task_id, "state": task.state, "result": task.result if task.successful() else None}
-from app.aws_services import router as aws_router
-app.include_router(aws_router)
