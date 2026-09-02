@@ -68,7 +68,7 @@ jobs:
           ignore-unfixed: true
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::454229053884:role/docker-aws-study-phase12-github-actions-role
           aws-region: ${{ env.AWS_REGION }}
