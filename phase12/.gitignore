@@ -1,0 +1,15 @@
+.env
+*.secret.yaml
+*.pem
+*.key
+*.log
+*.pid
+credentials
+node_modules/
+dist/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+config/encoding-test.txt
+config/argocd-port-forward.pid
+config/gateway-port-forward.pid
