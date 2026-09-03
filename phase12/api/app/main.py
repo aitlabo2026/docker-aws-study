@@ -37,3 +37,7 @@ def create_job(user=Depends(current_user)):
 def job_status(task_id: str, user=Depends(current_user)):
     task = AsyncResult(task_id, app=celery_app)
     return {"task_id": task_id, "state": task.state, "result": task.result if task.successful() else None}
+
+@app.get("/api/cicd-test")
+def cicd_test():
+    return {"message": "phase12-cicd-ok"}
